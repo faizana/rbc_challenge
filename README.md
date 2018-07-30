@@ -9,7 +9,8 @@ python api/etl_api.py
 
 The api folder contains the api to query flask app for querying the data from MongoDB:
 
-Sample curl request to retieve results of "Extract customers within an income range (eg. 100k-150k) and spent at least $1000 in a particular city (eg. Toronto) in a particular month (eg. March)"
+Sample curl request to retieve results of 
+### "Extract customers within an income range (eg. 100k-150k) and spent at least $1000 in a particular city (eg. Toronto) in a particular month (eg. March)"
 ```
 curl http://localhost:8000/api/v1/extract_users -X POST -H "Content-Type:application/json" -d '{"income_range":{"min":100000, "max":150000},"city":"Toronto","spending":1000, "month":3}'
 ```
