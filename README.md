@@ -31,10 +31,7 @@ This will return an array of account_ids (_id) and their respective spending in 
   }
   ]
   ```
-The spark folder contains the ETL pipeline.
-
-syntax for running pipeline reading from csv sources above:
-
+## How to run the ETL pipeline
 ### Assuming Spark 2.2
 
 ```
