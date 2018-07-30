@@ -1,16 +1,27 @@
-# rbc_challenge
-Data can be downloaded from following link:
+# Running the challenge
+The input data can be downloaded from following link:
 https://drive.google.com/open?id=1oMLveG9KkgjXWFNflfHLmdZm_RMiwZ0e
 
-The api folder contains the api to query flask app for querying the data from MongoDB:
+The mongo_customer_transaction_data_joined.csv can be imported into a mongo collection and queries via the flask api. The api can be run by typing:
 ```
-curl http://localhost:8000/api/v1/extract_users -X POST -H "Content-Type:application/json" -d '{"income_range":{"min":100000, "max":150000},"city":"Toronto","spending":10000, "month":3}'
+python api/etl_api.py
+```
+
+The api folder contains the api to query flask app for querying the data from MongoDB:
+
+Sample curl request to retieve results of "Extract customers within an income range (eg. 100k-150k) and spent at least $1000 in a particular city (eg. Toronto) in a particular month (eg. March)"
+```
+curl http://localhost:8000/api/v1/extract_users -X POST -H "Content-Type:application/json" -d '{"income_range":{"min":100000, "max":150000},"city":"Toronto","spending":1000, "month":3}'
 ```
 The spark folder contains the ETL pipeline.
 
-syntax for running pipeline reading from csv source from data above:
+syntax for running pipeline reading from csv sources above:
+
+### Assuming Spark 2.2
 
 ```
 spark-submit etl.py --jars <mongo_db.jar> --customer_table [<csvPath>,"csv"] --address_table [<csvPath>,"csv"] --transaction_table [<csvPath>,"csv"] --date_format yyyy-MM-dd'T'HH:mm:ss.SSS'Z' --csv_sep ,
 
 ```
+
+In case of difficulty running contact ahm.faizan@gmail.com
