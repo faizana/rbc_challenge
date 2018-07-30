@@ -2,7 +2,7 @@
 The input data can be downloaded from following link:
 https://drive.google.com/open?id=1oMLveG9KkgjXWFNflfHLmdZm_RMiwZ0e
 
-The `mongo_customer_transaction_data_joined.csv` can be imported into a mongo collection and queries via the flask api. The api can be run by typing:
+The `mongo_customer_transaction_data_joined.csv` can be imported into a mongo collection and queried via the flask api. The api can be run by typing:
 ```
 python api/etl_api.py
 ```
