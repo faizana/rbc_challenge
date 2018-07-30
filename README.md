@@ -35,7 +35,7 @@ This will return an array of account_ids (_id) and their respective spending in 
 ### Assuming Spark 2.2
 
 ```
-spark-submit etl.py --jars <mongo_db.jar> --customer_table [<csvPath>,"csv"] --address_table [<csvPath>,"csv"] --transaction_table [<csvPath>,"csv"] --date_format yyyy-MM-dd'T'HH:mm:ss.SSS'Z' --csv_sep ,
+spark-submit etl.py --jars '<mongo_db.jar>' --customer_table [<csvPath>,"csv"] --address_table [<csvPath>,"csv"] --transaction_table [<csvPath>,"csv"] --date_format yyyy-MM-dd'T'HH:mm:ss.SSS'Z' --csv_sep ,
 
 ```
 
