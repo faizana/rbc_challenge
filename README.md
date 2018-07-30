@@ -33,6 +33,7 @@ This will return an array of account_ids (_id) and their respective spending in 
   ```
 ## How to run the ETL pipeline
 ### Assuming Spark 2.2
+You can give paths of either .csv or .parquet files, example of running csv below
 
 ```
 spark-submit etl.py --jars '<mongo_db.jar>' --customer_table [<csvPath>,"csv"] --address_table [<csvPath>,"csv"] --transaction_table [<csvPath>,"csv"] --date_format yyyy-MM-dd'T'HH:mm:ss.SSS'Z' --csv_sep ,
