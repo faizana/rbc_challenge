@@ -13,6 +13,13 @@ spark = SparkSession.builder \
 
 
 def read_from_source(source_type, path, options={}):
+    """
+
+    :param source_type: csv or parquet
+    :param path: single path for csc or array of paths for parquet
+    :param options: separator for csv
+    :return: dataframe
+    """
     source_df = spark.createDataFrame([dict(empty=True)])
     df_reader = spark.read
     try:
@@ -30,10 +37,25 @@ def read_from_source(source_type, path, options={}):
 
 
 def join_df(left, right, left_key, right_key, join_type="inner"):
+    """
+
+    :param left: The left df
+    :param right: the right
+    :param left_key: the key to join on the left df
+    :param right_key: the key to join on the right df
+    :param join_type: left,right,inner
+    :return: dataframe
+    """
     return left.join(right, left[left_key] == right[right_key], join_type).drop(right[right_key])
 
 
 def parse_dates(df, format):
+    """
+    Parses dateinto year,month,day
+    :param df: input df
+    :param format: the format of the timestamp
+    :return: dataframe
+    """
     return df.withColumn('parsed_date',
                          f.to_timestamp(f.col('transaction_date'), format)) \
         .withColumn("year", f.year(f.col('parsed_date'))) \
@@ -44,12 +66,23 @@ def parse_dates(df, format):
 
 
 def process_writeable_df(joined_df, date_format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"):
+    """
+    Prepares the dataframe for writing to mongo
+    :param joined_df:
+    :param date_format:
+    :return:
+    """
     df_with_parsed_dates = parse_dates(joined_df, date_format)
     df_with_id = df_with_parsed_dates.withColumn("id", f.concat(f.col('account_id'), f.lit("_"), f.col("unix_ts")))
     return df_with_id.na.drop()
 
 
 def write_to_mongo(df):
+    """
+    Writes dataframe as collection in mongodb
+    :param df:
+    :return:
+    """
     df.write.format("com.mongodb.spark.sql.DefaultSource").mode("overwrite")\
         .option("database", "etl").option("collection","cus_trans_data").save()
 
@@ -64,7 +97,7 @@ if __name__ == '__main__':
                         help="The args [path,source_format] of the transaction table as a list")
     parser.add_argument('--date_format', type=str, required=True, dest='date_format',
                         help="The transaction date format e.g yyyy-MM-dd'T'HH:mm:ss.SSS'Z' " )
-    parser.add_argument('--csv_sep', type=str, required=False, dest='csv_sep',
+    parser.add_argument('--csv_sep', type=str, required=False, dest='csv_sep', default=",",
                         help="The transaction date format e.g yyyy-MM-dd'T'HH:mm:ss.SSS'Z' ")
 
     args = parser.parse_args()
@@ -76,11 +109,11 @@ if __name__ == '__main__':
 
     customer_df = read_from_source(config['customer']['source_type'], config['customer']['path'],config['options'])\
         .toDF("cus_address_id","account_id","first_name","last_name","income")
-    address_df = read_from_source(config['address']['source_type'], config['address']['path'],config['options']).toDF("trans_address_id","account_id","transaction_amount","transaction_date")
+    address_df = read_from_source(config['address']['source_type'], config['address']['path'],config['options'])
     transaction_df = read_from_source(config['transaction']['source_type'], config['transaction']['path'],config['options'])\
         .toDF("trans_address_id","account_id","transaction_amount","transaction_date")
     customer_transaction_data = join_df(customer_df,join_df(transaction_df,address_df,"trans_address_id","address_id"),
-                                        "account_id","account_id", config['options'])
+                                        "account_id","account_id")
     mongo_coll_df = process_writeable_df(customer_transaction_data, args.date_format)
     write_to_mongo(mongo_coll_df)
 

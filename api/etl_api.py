@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 
 @app.route("/api/v1/extract_users", methods=['POST'])
-def search():
+def extract_users():
     post_data = request.get_json()
     # REQUIRED: Validate the post_data arguments.
 
