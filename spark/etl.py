@@ -12,7 +12,7 @@ spark = SparkSession.builder \
         .getOrCreate()
 
 
-def read_from_source(source_type, path, options):
+def read_from_source(source_type, path, options={}):
     source_df = spark.createDataFrame([dict(empty=True)])
     df_reader = spark.read
     try:
@@ -64,17 +64,21 @@ if __name__ == '__main__':
                         help="The args [path,source_format] of the transaction table as a list")
     parser.add_argument('--date_format', type=str, required=True, dest='date_format',
                         help="The transaction date format e.g yyyy-MM-dd'T'HH:mm:ss.SSS'Z' " )
+    parser.add_argument('--csv_sep', type=str, required=False, dest='csv_sep',
+                        help="The transaction date format e.g yyyy-MM-dd'T'HH:mm:ss.SSS'Z' ")
 
     args = parser.parse_args()
     config = dict(
-        customer=dict(path=json.loads(args.customer_table[0]), source_type=json.loads(args.customer_table[1]), options = dict(csv=dict(sep=","))),
-        address=dict(path=json.loads(args.address_table[0]), source_type=json.loads(args.address_table[1]),options = dict(csv=dict(sep=","))),
+        customer=dict(path=json.loads(args.customer_table[0]), source_type=json.loads(args.customer_table[1]), options = dict(csv=dict(sep=args.csv_sep))),
+        address=dict(path=json.loads(args.address_table[0]), source_type=json.loads(args.address_table[1]),options = dict(csv=dict(sep=args.csv_sep))),
         transaction=dict(
-            path=json.loads(args.transaction_table[0]), source_type=json.loads(args.transaction_table[1]), options = dict(csv=dict(sep=","))))
+            path=json.loads(args.transaction_table[0]), source_type=json.loads(args.transaction_table[1]), options = dict(csv=dict(sep=args.csv_sep))))
 
-    customer_df = read_from_source(config['customer']['source_type'], config['customer']['path'],config['options'])
-    address_df = read_from_source(config['address']['source_type'], config['address']['path'],config['options'])
-    transaction_df = read_from_source(config['transaction']['source_type'], config['transaction']['path'],config['options'])
+    customer_df = read_from_source(config['customer']['source_type'], config['customer']['path'],config['options'])\
+        .toDF("cus_address_id","account_id","first_name","last_name","income")
+    address_df = read_from_source(config['address']['source_type'], config['address']['path'],config['options']).toDF("trans_address_id","account_id","transaction_amount","transaction_date")
+    transaction_df = read_from_source(config['transaction']['source_type'], config['transaction']['path'],config['options'])\
+        .toDF("trans_address_id","account_id","transaction_amount","transaction_date")
     customer_transaction_data = join_df(customer_df,join_df(transaction_df,address_df,"trans_address_id","address_id"),
                                         "account_id","account_id", config['options'])
     mongo_coll_df = process_writeable_df(customer_transaction_data, args.date_format)
