@@ -13,6 +13,24 @@ Sample curl request to retieve results of "Extract customers within an income ra
 ```
 curl http://localhost:8000/api/v1/extract_users -X POST -H "Content-Type:application/json" -d '{"income_range":{"min":100000, "max":150000},"city":"Toronto","spending":1000, "month":3}'
 ```
+
+This will return an array of account_ids (_id) and their respective spending in that month of customers in the following form:
+```
+[
+  {
+    "_id": 2226,
+    "spending": 4654.6
+  },
+  {
+    "_id": 3708,
+    "spending": 1500.0
+  },
+  {
+    "_id": 2753,
+    "spending": 2100.0
+  }
+  ]
+  ```
 The spark folder contains the ETL pipeline.
 
 syntax for running pipeline reading from csv sources above:
